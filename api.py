@@ -73,7 +73,13 @@ def get_data():
 
 	txt_contents4 = ""
 	for line in contents4:
-		txt_contents4 = txt_contents4 + line.text
+		txt_contents4 = txt_contents4 + line.text + " "
+
+	data['Conservación y utilización'] = {1: title4, 2: txt_contents4}
+
+	EAN = driver.find_element(By.XPATH, '//span[contains(@itemprop, "sku")]').text
+	data['EAN'] = EAN
+	
 	return jsonify(data)
 
 
