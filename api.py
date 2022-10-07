@@ -91,4 +91,4 @@ def get_data():
 
 	return json.dumps(data)
 
-app.run(debug=True)
+app.run()
