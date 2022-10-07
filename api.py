@@ -11,8 +11,6 @@ app = Flask(__name__)
 def get_data():
 	
 	target_link = request.args.get('link')
-
-	data = {}
 	
 	options = Options()
 	options.headless = True
@@ -25,15 +23,12 @@ def get_data():
 
 	driver = webdriver.Chrome(options=options)
 	driver.get(target_link)
-	time.sleep(10)
+	time.sleep(6)
 
 	driver.find_element(By.ID, 'cookies-agree-all').click()
 
 	product_title = driver.find_element(By.CLASS_NAME, 'pdp-title').text
 	product_price = driver.find_element(By.CLASS_NAME, 'pdp-prices').text
-
-	data[1] = product_title
-	data[2] = product_price
 
 	infos = driver.find_elements(By.CLASS_NAME, 'info')
 
@@ -44,16 +39,12 @@ def get_data():
 	for line in contents1:
 		txt_contents1 = txt_contents1 + line.text + " "
 
-	data['Información general'] = {1: title1, 2: txt_contents1}
-
 	title2 = infos[1].find_element(By.TAG_NAME, 'h3').text
 	contents2 = infos[1].find_elements(By.TAG_NAME, 'li')
 
 	txt_contents2 = ""
 	for line in contents2:
 		txt_contents2 = txt_contents2 + line.text + ""
-
-	data['Ingredientes y alérgenos'] = {1: title2, 2: txt_contents2}
 
 	# Nutrients
 	title3 = infos[2].find_element(By.TAG_NAME, 'h4').text
@@ -66,8 +57,6 @@ def get_data():
 		if (tr.get_attribute("class") == "table-row _info" or tr.get_attribute("class") == "table-sub-row _info"):
 			txt_contents3 = txt_contents3 + tr.text + " "
 
-	data['Nutrientes'] = {1:title3, 2: sub_title, 3: txt_contents3}
-
 	title4 = infos[4].find_element(By.TAG_NAME, 'h3').text
 	contents4 = infos[4].find_elements(By.TAG_NAME, 'li')
 
@@ -75,12 +64,31 @@ def get_data():
 	for line in contents4:
 		txt_contents4 = txt_contents4 + line.text + " "
 
-	data['Conservación y utilización'] = {1: title4, 2: txt_contents4}
-
 	EAN = driver.find_element(By.XPATH, '//span[contains(@itemprop, "sku")]').text
-	data['EAN'] = EAN
-	
-	return jsonify(data)
 
+	data = {
+		"title" : product_title,
+		"price" : product_price,
+		"Información general" : {
+			"title" : title1,
+			"content" : txt_contents1
+		},
+		"Ingredientes y alérgenos" : {
+			"title" : title2,
+			"content" : txt_contents2
+		},
+		"Nutrientes" : {
+			"title" : title3,
+			"sub title" : sub_title,
+			"content" : txt_contents3
+		},
+		"Conservación y utilización" : {
+			"title" : title4,
+			"content" : txt_contents4
+		},
+		"EAN" : EAN,
+	}
+
+	return json.dumps(data)
 
 app.run(debug=True)
